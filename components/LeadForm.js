@@ -1,24 +1,34 @@
 'use client';
+
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { leadSchema } from '@/lib/validations';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 export default function LeadForm() {
   const [serverError, setServerError] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({ resolver: zodResolver(leadSchema) });
+
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(leadSchema),
+  });
 
   const onSubmit = async (data) => {
     setServerError('');
     try {
-      const response = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Something went wrong.');
+      if (!response.ok) throw new Error(result.error || 'Submission failed.');
+
       reset();
       setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 5000);
+      setTimeout(() => setShowSuccessToast(false), 4000);
     } catch (error) {
       setServerError(error.message);
     }
@@ -26,47 +36,59 @@ export default function LeadForm() {
 
   return (
     <div className="relative">
+      {/* Top Right Fixed Toast */}
       {showSuccessToast && (
-        <div className="absolute -top-4 left-0 right-0 bg-green-50 text-green-700 p-4 rounded-lg flex items-center gap-3 border border-green-200 mb-6 shadow-sm z-10 transition-all">
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
+        <div className="fixed top-6 right-6 z-50 bg-black dark:bg-white text-white dark:text-black px-6 py-4 rounded-lg flex items-center gap-3 shadow-2xl transition-all">
+          <CheckCircle2 className="h-5 w-5" />
           <p className="font-medium text-sm">Inquiry submitted successfully!</p>
         </div>
       )}
+
+      <div className="text-center mb-8">
+        <img src="/assets/logo.png" alt="LeadDesk Mini" className="w-12 h-12 mx-auto mb-4 object-contain" />
+        <h2 className="text-2xl font-bold tracking-tight">Start Your Project</h2>
+        <p className="text-neutral-500 dark:text-neutral-400 mt-2 text-sm">Enter your details and we will respond shortly.</p>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {serverError && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-200">{serverError}</div>}
-        
+        {serverError && (
+          <div className="p-3 bg-neutral-100 dark:bg-neutral-900 text-red-600 dark:text-red-400 text-sm rounded-md border border-red-200 dark:border-red-900/30">
+            {serverError}
+          </div>
+        )}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-          <input {...register('name')} type="text" className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
-          {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
+          <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Full Name</label>
+          <input {...register('name')} type="text" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" />
+          {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-          <input {...register('email')} type="email" className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none" />
-          {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
+          <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Email</label>
+          <input {...register('email')} type="email" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" />
+          {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Budget Range</label>
-          <select {...register('budget')} className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-            <option value="">Select a budget...</option>
-            <option value="Under $1,000">Under $1,000</option>
-            <option value="$1,000–$5,000">$1,000–$5,000</option>
-            <option value="$5,000–$10,000">$5,000–$10,000</option>
-            <option value="$10,000+">$10,000+</option>
+          <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Budget Range</label>
+          <select {...register('budget')} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors appearance-none">
+            <option value="" className="text-black">Select a budget...</option>
+            <option value="Under $1,000" className="text-black">Under $1,000</option>
+            <option value="$1,000–$5,000" className="text-black">$1,000–$5,000</option>
+            <option value="$5,000–$10,000" className="text-black">$5,000–$10,000</option>
+            <option value="$10,000+" className="text-black">$10,000+</option>
           </select>
-          {errors.budget && <p className="mt-1 text-sm text-red-500">{errors.budget.message}</p>}
+          {errors.budget && <p className="mt-1.5 text-sm text-red-500">{errors.budget.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Project Message</label>
-          <textarea {...register('message')} rows={4} className="w-full px-4 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
-          {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>}
+          <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Project Message</label>
+          <textarea {...register('message')} rows={4} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors resize-none" />
+          {errors.message && <p className="mt-1.5 text-sm text-red-500">{errors.message.message}</p>}
         </div>
 
-        <button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 text-white font-medium py-2.5 px-4 rounded-md hover:bg-blue-700 transition disabled:opacity-70 flex items-center justify-center gap-2">
-          {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : 'Submit Inquiry'}
+        <button type="submit" disabled={isSubmitting} className="w-full bg-black text-white dark:bg-white dark:text-black font-semibold py-3 px-4 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-70 mt-2">
+          {isSubmitting ? 'Submitting Inquiry...' : 'Submit Inquiry'}
         </button>
       </form>
     </div>
