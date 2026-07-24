@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { leadSchema } from '@/lib/validations';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react'; // <-- Added Loader2
 
 export default function LeadForm() {
   const [serverError, setServerError] = useState('');
@@ -59,19 +59,19 @@ export default function LeadForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Full Name</label>
-          <input {...register('name')} type="text" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" />
+          <input {...register('name')} type="text" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" disabled={isSubmitting} />
           {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name.message}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Email</label>
-          <input {...register('email')} type="email" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" />
+          <input {...register('email')} type="email" className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors" disabled={isSubmitting} />
           {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email.message}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Budget Range</label>
-          <select {...register('budget')} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors appearance-none">
+          <select {...register('budget')} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors appearance-none" disabled={isSubmitting}>
             <option value="" className="text-black">Select a budget...</option>
             <option value="Under $1,000" className="text-black">Under $1,000</option>
             <option value="$1,000–$5,000" className="text-black">$1,000–$5,000</option>
@@ -83,12 +83,39 @@ export default function LeadForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">Project Message</label>
-          <textarea {...register('message')} rows={4} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors resize-none" />
+          <textarea {...register('message')} rows={4} className="w-full px-4 py-2.5 bg-transparent border border-neutral-300 dark:border-neutral-700 rounded-lg focus:border-black dark:focus:border-white outline-none transition-colors resize-none" disabled={isSubmitting} />
           {errors.message && <p className="mt-1.5 text-sm text-red-500">{errors.message.message}</p>}
         </div>
 
-        <button type="submit" disabled={isSubmitting} className="w-full bg-black text-white dark:bg-white dark:text-black font-semibold py-3 px-4 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors disabled:opacity-70 mt-2">
-          {isSubmitting ? 'Submitting Inquiry...' : 'Submit Inquiry'}
+        {/* Updated Button with Shimmer + Spinner */}
+        <button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className={`relative w-full font-semibold py-3 px-4 rounded-lg mt-2 transition-all overflow-hidden ${
+            isSubmitting 
+              ? 'bg-neutral-800 text-neutral-400 dark:bg-neutral-200 dark:text-neutral-500 cursor-wait' 
+              : 'bg-black text-white dark:bg-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200'
+          }`}
+        >
+          {/* Shimmer Effect */}
+          {isSubmitting && (
+            <div 
+              className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/20 to-transparent animate-shimmer"
+              style={{ width: '100%' }}
+            />
+          )}
+          
+          {/* Text and Spinner */}
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Submitting Inquiry...
+              </>
+            ) : (
+              'Submit Inquiry'
+            )}
+          </span>
         </button>
       </form>
     </div>
