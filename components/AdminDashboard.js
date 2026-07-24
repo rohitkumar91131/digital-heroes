@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import DashboardSearch from './DashboardSearch';
 import LeadTable from './LeadTable';
 import Pagination from './Pagination';
+import LeadModal from './LeadModal';
 
 export default function AdminDashboard() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Search & Pagination States
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingId, setUpdatingId] = useState(null);
@@ -51,19 +51,16 @@ export default function AdminDashboard() {
     }
   };
 
-  // Jab bhi search term change ho, page 1 par reset kar do
   const handleSearch = (term) => {
     setSearchTerm(term);
     setCurrentPage(1);
   };
 
-  // 1. Filter Leads
   const filteredLeads = leads.filter(lead => {
     const term = searchTerm.toLowerCase();
     return lead.name.toLowerCase().includes(term) || lead.email.toLowerCase().includes(term);
   });
 
-  // 2. Pagination Math
   const totalPages = Math.ceil(filteredLeads.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentLeads = filteredLeads.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -88,6 +85,11 @@ export default function AdminDashboard() {
           onPageChange={setCurrentPage} 
         />
       )}
+
+      {/* URL driven Modal rendering */}
+      <Suspense fallback={null}>
+        <LeadModal leads={leads} />
+      </Suspense>
     </div>
   );
 }
