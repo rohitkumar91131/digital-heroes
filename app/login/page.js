@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Zap } from 'lucide-react'; // Added Zap
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Standard Login Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -33,8 +34,33 @@ export default function LoginPage() {
     }
   };
 
+  // 1-Click Assignment Evaluator Login
+  const handleTestLogin = async () => {
+    setLoading(true);
+    setError('');
+    
+    // Auto-fill values
+    setEmail('admin@digitalheroes.com');
+    setPassword('securepassword123');
+
+    // Direct submit
+    const res = await signIn('credentials', {
+      email: 'admin@digitalheroes.com',
+      password: 'securepassword123',
+      redirect: false,
+    });
+
+    if (res?.error) {
+      setError('Test credentials failed. Check your .env variables.');
+      setLoading(false);
+    } else {
+      router.push('/admin');
+      router.refresh(); 
+    }
+  };
+
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-12">
+    <div className="flex-1 flex flex-col items-center justify-center py-12 px-4">
       <div className="w-full max-w-md bg-white dark:bg-[#111] p-8 sm:p-10 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xl">
         <div className="text-center mb-8">
           <img src="/assets/logo.png" alt="Logo" className="w-12 h-12 mx-auto mb-4 object-contain" />
@@ -88,19 +114,38 @@ export default function LoginPage() {
                 : 'bg-black text-white dark:bg-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200'
             }`}
           >
-            {/* Shimmer Effect Overlay */}
             {loading && (
               <div 
                 className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 dark:via-black/20 to-transparent animate-shimmer"
                 style={{ width: '100%' }}
               />
             )}
-            
             <span className="relative z-10 flex items-center justify-center gap-2">
               {loading ? 'Authenticating...' : 'Login'}
             </span>
           </button>
         </form>
+
+        {/* 1-Click Assignment Login Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-neutral-200 dark:border-neutral-800"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-[#111] text-neutral-400 font-medium">Assignment Evaluation</span>
+          </div>
+        </div>
+
+        {/* 1-Click Login Button */}
+        <button
+          type="button"
+          onClick={handleTestLogin}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-neutral-300 dark:border-neutral-700 text-sm font-medium text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors disabled:opacity-50"
+        >
+          <Zap className="w-4 h-4 text-yellow-500" />
+          1-Click Test Login
+        </button>
       </div>
     </div>
   );
