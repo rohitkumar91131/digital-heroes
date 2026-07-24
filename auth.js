@@ -1,8 +1,5 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { connectDB } from '@/lib/db';
-import User from '@/models/User';
-import bcrypt from 'bcryptjs';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -13,29 +10,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing credentials');
+        // Direct .env se check ho raha hai
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        if (credentials?.email === adminEmail && credentials?.password === adminPassword) {
+          // Valid: Return user object (JWT generate hogi)
+          return { id: 'admin-1', name: 'Admin', email: adminEmail };
         }
 
-        await connectDB();
-        const user = await User.findOne({ email: credentials.email });
-
-        if (!user) throw new Error('Invalid credentials');
-
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValid) throw new Error('Invalid credentials');
-
-        return { id: user._id.toString(), email: user.email };
+        // Invalid
+        throw new Error('Invalid email or password');
       },
     }),
   ],
   pages: {
-    signIn: '/login',
+    signIn: '/login', // Custom login page ka route
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 Days
+    maxAge: 30 * 24 * 60 * 60, // 30 Days ki cookie
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
 });
